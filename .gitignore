@@ -1,0 +1,10 @@
+node_modules/
+target/
+dist/
+dist-release/
+*.dmg
+.DS_Store
+/tmp/
+engines/musicgen/build/
+engines/musicgen/dist/
+src-tauri/resources/engines/musicgen/tonelab-engine
