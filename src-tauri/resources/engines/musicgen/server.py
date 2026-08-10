@@ -1287,7 +1287,7 @@ class Handler(BaseHTTPRequestHandler):
                 output_path = os.path.join(OUTPUT_DIR, filename)
             else:
                 output_path = os.path.join(
-                    OUTPUT_DIR, f"{engine_id.replace('/', '_')}_{int(time.time())}.wav"
+                    OUTPUT_DIR, f"tonelab_{int(time.time())}.wav"
                 )
 
             engine = get_engine(engine_id)

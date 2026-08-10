@@ -214,6 +214,21 @@
     prompt = getEnhancedPrompt(basePrompt);
   }
 
+  // 自动文件名：风格-情绪-场景_时间戳（不暴露模型名）
+  // 用户留空文件名时用这个；后端兜底命名带模型 id，前端永远传名不触发
+  function autoFilename() {
+    const ts = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    const stamp = `${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}${pad(ts.getSeconds())}`;
+    const parts = [];
+    if (activePreset) parts.push(activePreset);
+    if (activeMoods.length) parts.push(activeMoods[0]);
+    if (activeScenes.length) parts.push(activeScenes[0]);
+    // 空标签时给通用名，避免裸时间戳
+    const tag = parts.length ? parts.join("-") : "自由创作";
+    return `${tag}_${stamp}.wav`;
+  }
+
   function usePresetWithEnhance(p) {
     if (activePreset === p.name) {
       // 再次点击 = 取消预设，保留手写内容或清空
@@ -576,7 +591,7 @@
         engine: selectedEngine,
         prompt: prompt.trim(),
         duration,
-        filename: fileName.trim() || null,
+        filename: fileName.trim() || autoFilename(),
         guidanceScale: genGuidance,
         temperature: genTemperature,
         topK: genTopK,
