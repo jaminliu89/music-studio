@@ -32,6 +32,9 @@ Parent rule: `skill-hub/docs/PRODUCT_CONSTITUTION.md`
 - [x] 云端 Provider 不可用时回退到 ACE-Step / MusicGen，并记录 requested provider / actual engine
 - [x] 真实音频读取协议已接入 (`read_audio_file` → Blob URL → `<audio>`)
 - [x] 结果 provenance（requested provider / actual engine / reason / generatedAt）
+- [x] GitHub Actions workflow (`.github/workflows/dme-ci.yml`) 已建立
+- [x] PR #1 已建立用于机器验收触发
+- [ ] GitHub Actions 实际产生 workflow run（当前连接器提交/PR 后仍为 0 run，视为仓库 Actions 环境阻塞，不误报通过）
 - [ ] 在用户真实本机确认第一次 Story → Score 音频成功生成并播放
 - [ ] 在真实本机运行 `npm run dme:smoke` + `npm run build`
 
@@ -41,10 +44,11 @@ Parent rule: `skill-hub/docs/PRODUCT_CONSTITUTION.md`
 
 - [x] 建立 `GenerationGateway`
 - [x] Director Pick / Restrained / Cinematic / Raw 四种版本进入真实生成入口
+- [x] A/B/C/D 从 prompt-level suffix 升级为规范化 Blueprint Variant Patch (`src/lib/dme/blueprintVariants.js`)
+- [x] Variant Blueprint 在生成前重新编译 runtime payload，并随结果返回 provenance
 - [x] 生成状态：directing / ready_to_generate / generating / ready / failed/runtime_unavailable
 - [x] 音频播放器 + generation metadata
 - [x] Provider fallback 对普通用户隐藏底层复杂度，同时保留 provenance
-- [ ] A/B/C/D 从“prompt-level variant”升级为规范化 Blueprint variant patch
 - [ ] Project persistence：保存 Project + Blueprint + routing + results
 - [ ] Music Critic 插入 generation → critique → rank
 - [ ] waveform / cue-level result visualization
@@ -83,16 +87,17 @@ Parent rule: `skill-hub/docs/PRODUCT_CONSTITUTION.md`
 
 当前代码层已经具备：
 
-`Scene / Script / Voiceover → Director Intelligence → Score Blueprint → Provider Router → GenerationGateway → Tauri local engine → Audio Result`
+`Scene / Script / Voiceover → Director Intelligence → Score Blueprint → Blueprint Variant → Provider Router → GenerationGateway → Tauri local engine → Audio Result`
 
 但当前里程碑仍不能宣称完成，直到真实设备完成以下验收：
 
 1. 新 DME Studio 可启动。
 2. `Score This` 正常生成 Blueprint。
-3. `Generate Director Pick` 调用至少一个真实已安装引擎。
-4. wav 返回并可在 DME Studio 内播放。
-5. Provider fallback / provenance 显示正确。
-6. ToneLab `?legacy=1` 仍正常可用。
-7. `npm run dme:smoke` 与 `npm run build` 通过。
+3. A/B/C/D 生成的是不同 Blueprint 语义，而不是简单 prompt 后缀。
+4. `Generate Director Pick` 调用至少一个真实已安装引擎。
+5. wav 返回并可在 DME Studio 内播放。
+6. Provider fallback / provenance 显示正确。
+7. ToneLab `?legacy=1` 仍正常可用。
+8. `npm run dme:smoke` 与 `npm run build` 通过。
 
-当前唯一主线阻塞：**真实运行环境验收，而不是继续扩写产品文档。**
+当前主线阻塞：**真实运行环境验收与 GitHub Actions 未产生 run；不是继续扩写产品文档。**
