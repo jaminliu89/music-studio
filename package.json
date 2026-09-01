@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build && bash scripts/sync-resources.sh",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dme:smoke": "node scripts/dme-smoke.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
