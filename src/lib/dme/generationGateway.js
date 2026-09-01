@@ -1,4 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
+import { compileForCurrentRuntime } from './providerRouter.js';
+import { applyBlueprintVariant } from './blueprintVariants.js';
 
 const LOCAL_PROVIDER_TO_ENGINE = {
   'musicgen': 'musicgen-small',
@@ -38,15 +40,17 @@ export async function generateFromBlueprint({ blueprint, routing, runtimePayload
     };
   }
 
+  const variantBlueprint = applyBlueprintVariant(blueprint, variant);
+  const compiled = compileForCurrentRuntime(variantBlueprint);
+  const effectiveRuntime = { ...(runtimePayload || {}), ...compiled };
   const engine = resolveEngine(routing?.provider, capabilities.engines);
-  const filename = buildFilename(blueprint, variant);
-  const prompt = applyVariantPrompt(runtimePayload.prompt, variant);
+  const filename = buildFilename(variantBlueprint, variant);
 
   try {
     const result = await invoke('generate_music', {
       engine,
-      prompt,
-      duration: Math.max(3, Math.round(runtimePayload.duration)),
+      prompt: effectiveRuntime.prompt,
+      duration: Math.max(3, Math.round(effectiveRuntime.duration)),
       filename,
       guidanceScale: 3.0,
       temperature: variant === 'raw' ? 1.08 : 1.0,
@@ -60,6 +64,8 @@ export async function generateFromBlueprint({ blueprint, routing, runtimePayload
         status: 'failed',
         requestedProvider: routing?.provider,
         actualEngine: engine,
+        variant,
+        variantBlueprint,
         error: result?.error || 'Generation failed.',
       };
     }
@@ -78,12 +84,16 @@ export async function generateFromBlueprint({ blueprint, routing, runtimePayload
       duration: result.duration,
       generationTime: result.generation_time,
       rtf: result.rtf,
-      scoreBlueprintVersion: blueprint.version,
+      scoreBlueprintVersion: variantBlueprint.version,
       variant,
+      variantBlueprint,
+      compiledRuntime: effectiveRuntime,
       provenance: {
         requestedProvider: routing?.provider,
         actualEngine: engine,
         routeReason: routing?.reason,
+        variant,
+        scoreBlueprintVersion: variantBlueprint.version,
         generatedAt: new Date().toISOString(),
       },
     };
@@ -93,6 +103,8 @@ export async function generateFromBlueprint({ blueprint, routing, runtimePayload
       status: 'failed',
       requestedProvider: routing?.provider,
       actualEngine: engine,
+      variant,
+      variantBlueprint,
       error: String(error),
     };
   }
@@ -108,16 +120,6 @@ function resolveEngine(provider, readyEngines) {
 
 function providerMatchesEngine(provider, engine) {
   return LOCAL_PROVIDER_TO_ENGINE[provider] === engine;
-}
-
-function applyVariantPrompt(prompt, variant) {
-  const additions = {
-    director: 'Follow the director blueprint faithfully.',
-    restrained: 'Use less instrumentation, more negative space, lower emotional manipulation, restrained dynamics.',
-    cinematic: 'Increase cinematic depth, spatial scale and long-form development without becoming generic trailer music.',
-    raw: 'Favor human imperfection, intimate room texture, natural performance variation and reduced polish.',
-  };
-  return `${prompt} ${additions[variant] || additions.director}`;
 }
 
 function buildFilename(blueprint, variant) {
