@@ -19,35 +19,42 @@ Parent rule: `skill-hub/docs/PRODUCT_CONSTITUTION.md`
 - [x] Smoke test fixture
 - [x] npm command: `npm run dme:smoke`
 - [x] Product-first UX Architecture
-- [x] 独立 DME Product Surface (`src/DMEApp.svelte`)
+- [x] 独立 DME Product Surface
+- [x] Runtime-connected DME Studio (`src/DMEStudio.svelte`)
 - [x] DME 设为默认入口
 - [x] ToneLab 保留为 Legacy / Local Surface (`?legacy=1`)
 - [x] UI 接入 `Score This`
 - [x] UI 显示 Story Intelligence / Emotion Arc / Score Blueprint / Provider Routing
-- [x] conversational direction v0：自然语言修改 Blueprint（首个“更克制/去弦乐”规则）
-- [x] 编译后的 current runtime payload 可在 DME Surface 查看
-- [ ] 将 Generate Versions 真正接入现有 `/generate` / Tauri command
-- [ ] 真实音频结果回到 DME versions rail
+- [x] conversational direction v0：自然语言修改 Blueprint（克制 / 去鼓 / 更电影）
+- [x] `GenerationGateway` 隔离 Surface 与 Tauri/local engine
+- [x] DME → Provider Router → runtime adapter → Tauri `generate_music`
+- [x] runtime capability discovery (`list_models`)
+- [x] 云端 Provider 不可用时回退到 ACE-Step / MusicGen，并记录 requested provider / actual engine
+- [x] 真实音频读取协议已接入 (`read_audio_file` → Blob URL → `<audio>`)
+- [x] 结果 provenance（requested provider / actual engine / reason / generatedAt）
+- [ ] 在用户真实本机确认第一次 Story → Score 音频成功生成并播放
 - [ ] 在真实本机运行 `npm run dme:smoke` + `npm run build`
 
 ## P0.5 — Product Surface Closure
 
 目标：不是 Demo 页面，而是完成第一次可听见的 Story → Score 闭环。
 
-- [ ] 建立 `GenerationGateway`，隔离 Surface 与 Tauri/local engine
-- [ ] `Generate Versions` → Provider Router → current runtime adapter → generation gateway
-- [ ] A/B/C/D 版本定义从静态卡片升级为 Blueprint variant patch
-- [ ] 生成状态：directing / queued / generating / critiquing / ready / failed
-- [ ] 音频播放器 + waveform placeholder/metadata
-- [ ] 保存 Project + Blueprint + routing decision + result provenance
-- [ ] Local / Cloud provider unavailable 时明确 fallback，不暴露内部复杂度
+- [x] 建立 `GenerationGateway`
+- [x] Director Pick / Restrained / Cinematic / Raw 四种版本进入真实生成入口
+- [x] 生成状态：directing / ready_to_generate / generating / ready / failed/runtime_unavailable
+- [x] 音频播放器 + generation metadata
+- [x] Provider fallback 对普通用户隐藏底层复杂度，同时保留 provenance
+- [ ] A/B/C/D 从“prompt-level variant”升级为规范化 Blueprint variant patch
+- [ ] Project persistence：保存 Project + Blueprint + routing + results
+- [ ] Music Critic 插入 generation → critique → rank
+- [ ] waveform / cue-level result visualization
 
 ## P1 — Provider Adapters
 
 - [ ] MiniMax Music 3 adapter
 - [ ] ElevenLabs Music adapter
 - [ ] Lyria adapter
-- [ ] Provider health / capability discovery
+- [ ] Provider health / capability discovery v2（云端 + 本地统一）
 - [ ] License Guard
 - [ ] Provider result normalization
 
@@ -74,15 +81,18 @@ Parent rule: `skill-hub/docs/PRODUCT_CONSTITUTION.md`
 
 ## Definition of Done for current milestone
 
-当前里程碑只有在下面全部成立时才完成：
+当前代码层已经具备：
 
-1. 用户在新的 DME Surface 输入场景/剧本/旁白。
-2. DME 生成可见的 Story Intelligence + Score Blueprint。
-3. Provider Router 做出真实路由决定。
-4. 点击 Generate Versions 能调用当前至少一个真实可用引擎。
-5. 至少一个真实音频结果返回并可播放。
-6. Blueprint、provider、生成结果元数据保持可追踪。
-7. ToneLab legacy surface 仍可进入。
-8. `npm run dme:smoke` 与 `npm run build` 在真实环境通过。
+`Scene / Script / Voiceover → Director Intelligence → Score Blueprint → Provider Router → GenerationGateway → Tauri local engine → Audio Result`
 
-因此当前阶段不宣称“闭环完成”。当前唯一主线是：**把新的 DME Surface 接到真实生成 Gateway，并让第一段 Story → Score 音频真正播放出来。**
+但当前里程碑仍不能宣称完成，直到真实设备完成以下验收：
+
+1. 新 DME Studio 可启动。
+2. `Score This` 正常生成 Blueprint。
+3. `Generate Director Pick` 调用至少一个真实已安装引擎。
+4. wav 返回并可在 DME Studio 内播放。
+5. Provider fallback / provenance 显示正确。
+6. ToneLab `?legacy=1` 仍正常可用。
+7. `npm run dme:smoke` 与 `npm run build` 通过。
+
+当前唯一主线阻塞：**真实运行环境验收，而不是继续扩写产品文档。**
